@@ -1,0 +1,11 @@
+body{
+    margin: 0;
+    padding: 0;
+}
+#canvas
+{
+    padding: 0;
+}
+*{
+    line-height: 0.5;
+}

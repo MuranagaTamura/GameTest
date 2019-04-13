@@ -48,7 +48,8 @@ var srcs = [
     "img/wall.png",
     "img/block.png",
     "img/goal.png",
-    "img/player.png"
+    "img/player.png",
+    "img/block_goal.png"
 ];
 
 // 画像オブジェクトの配列
@@ -57,6 +58,38 @@ var images = [];
 for(var i in srcs)
 {
 	images[i] = new Glaphic(context,srcs[i],IMAGE_SIZE,IMAGE_SIZE);
+}
+
+// StageChipの個数を確認
+function typeCount(chip){
+    var count = 0;
+    for(var y = 0;y < STAGE_HEIGHT;y++){
+        for(var x = 0;x < STAGE_WIDTH;x++){
+            var position = y * STAGE_WIDTH + x;
+            if(stage[position] == chip){
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
+// タイトルに戻る
+function titleBack(){
+    // topのscriptを取得
+    var parent = document.getElementById('top');
+
+    var src = document.createElement('script');
+    src.setAttribute("id","home"); // id追加
+    src.setAttribute('src', 'src/home.js'); // src追加
+
+    var dst = document.getElementById('game');
+
+    count = 1;
+
+    parent.replaceChild(src , dst);
+    return;
 }
 
 // Playerを動かす先の座標を指定する。
@@ -81,19 +114,8 @@ function stageChange(){
                 dx = 1;
                 break;
             case 66:
-                if(count == 0){
-                    // topのscriptを取得
-                    var parent = document.getElementById('top');
-
-                    var src = document.createElement('script');
-                    src.setAttribute("id","home"); // id追加
-                    src.setAttribute('src', 'src/home.js'); // src追加
-
-                    var dst = document.getElementById('game');
-
-                    count = 1;
-                    
-                    parent.replaceChild(src , dst);
+                if(count == 0 && isClear()){
+                    titleBack();
                 }
             break;
 		}
@@ -114,7 +136,9 @@ function stageChange(){
 		var nowPosition = player_y_t * STAGE_WIDTH + player_x_t;
 
 		// 移動先が何もないか、ゴールなら
-		if(stage[nowPosition] == StageChip.NONE || stage[nowPosition] == StageChip.GOAL){
+		if(stage[nowPosition] == StageChip.NONE
+            || stage[nowPosition] == StageChip.GOAL
+            || stage[nowPosition] == StageChip.BLOCK_GOAL){
 			player_x = player_x_t;
 			player_y = player_y_t;
 		}
@@ -124,7 +148,9 @@ function stageChange(){
 			var nexPosition = (player_y_t + dy) * STAGE_WIDTH + (player_x_t + dx);
 			if(stage[nexPosition] == StageChip.NONE || stage[nexPosition] == StageChip.GOAL){
 				stage[nowPosition] = StageChip.NONE;
-				stage[nexPosition] = StageChip.BLOCK;
+				stage[nexPosition] =
+                    (stage[nexPosition] == StageChip.GOAL) ?
+                    StageChip.BLOCK_GOAL : StageChip.BLOCK;
 				player_x = player_x_t;
 				player_y = player_y_t;
 			}
@@ -162,9 +188,33 @@ function draw(){
     putPlayer(player_x,player_y);
 };
 
+// ゴール数をカウント
+var countGoal = typeCount(StageChip.GOAL);
+
+// Clearしているか確認
+function isClear(){
+    var countBloclGoal = typeCount(StageChip.BLOCK_GOAL);
+    if(countBloclGoal < countGoal){
+        return false;
+    }
+    return true;
+}
+
+// Clearしてたらこの処理に入る
+function clear(){
+    context.fillStyle = "blue";
+    context.font = "72px serif";
+    context.fillText("Clear!", 170, 250);
+    //context.font = "64px serif";
+    context.fillText("Please press \"B\"!", 10, 310);
+}
+
 function loop(){
     stageChange();
     draw();
+    if(isClear()){
+        clear();
+    }
     setTimeout("loop()",ms);
 };
 

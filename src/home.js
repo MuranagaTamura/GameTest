@@ -3,6 +3,7 @@ var Glaphic = require('./src/Glaphic');
 //2Dコンテキストのオブジェクトを生成する
 var canvas = document.getElementById('canvas');
 var context = canvas.getContext('2d');
+context.font = "48px serif";
 
 // FPS
 var fps = 30;
@@ -33,7 +34,7 @@ function draw(){
     background.paint(0,0);
 
     // タイトル文字
-    context.font = "48px serif";
+    context.fillStyle = "black";
     context.fillText("Norimonokun", 110, 100);
 
     // ボタン

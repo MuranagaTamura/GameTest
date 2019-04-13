@@ -1,43 +1,10 @@
-const Glaphic = require('./src/liblary'); // electron
-//import Glaphic from './src/liblary.js';
-// ブラウザでデバッグするよう↓
-/*
-class Glaphic {
-	// canvas htmlキャンバスを取得
-	// fileimage,imageWidth,imageHeight ファイル画像、画像幅、画像高さ
-	// constructor(canvas,filename,imageWidth,imageHeight) {
-	constructor(context,filename,imageWidth,imageHeight) {
-		// this.context = canvas.getContext('2d');
-		this.context = context;
-		this.img = new Image();
-		this.img.src = filename;
-		this.width = imageWidth;
-		this.height = imageHeight;
-		//console.log(context);
-		//console.log(this.context);
-	}
+var Glaphic = require('./src/Glaphic');
 
-	// drawImage
-	paint(x,y){
-		//console.log(this.context);
-		//console.log(this.img);
-		this.context.drawImage(this.img,x,y);
-	}
-}
-*/
 // ステージの幅、高さの定数
-const STAGE_WIDTH = 8;
-const STAGE_HEIGHT = 8;
+var STAGE_WIDTH = 8;
+var STAGE_HEIGHT = 8;
 // 画像の大きさの定数
-const IMAGE_SIZE = 64;
-
-// Player位置の変数
-var player_x = 5,player_y = 2;
-
-// FPS
-const fps = 30;
-var ms = 1000 / fps ;
-var count = 0;
+var IMAGE_SIZE = 64;
 
 // ステージのマップ
 var stage = [
@@ -51,8 +18,6 @@ var stage = [
     1,1,1,1,1,1,1,1,
 ];
 
-var buffered = new Array(STAGE_WIDTH * STAGE_HEIGHT);
-
 // stageチップ列挙
 var StageChip = {
 	NONE : 0,
@@ -61,8 +26,16 @@ var StageChip = {
 	GOAL : 3,
 	PLAYER : 4,
 	BLOCK_GOAL : 5,
-	PLAYER_GOAL : 6
+    UNKNOWN : 6
 };
+
+// Player位置の変数
+var player_x = 5,player_y = 2;
+
+// FPS
+var fps = 30;
+var ms = 1000 / fps ;
+var count = 0;
 
 //2Dコンテキストのオブジェクトを生成する
 var canvas = document.getElementById('canvas');
@@ -77,6 +50,7 @@ var srcs = [
     "img/goal.png",
     "img/player.png"
 ];
+
 // 画像オブジェクトの配列
 var images = [];
 // 画像インスタンス
@@ -106,6 +80,22 @@ function stageChange(){
             case 68: // D
                 dx = 1;
                 break;
+            case 66:
+                if(count == 0){
+                    // topのscriptを取得
+                    var parent = document.getElementById('top');
+
+                    var src = document.createElement('script');
+                    src.setAttribute("id","home"); // id追加
+                    src.setAttribute('src', 'src/home.js'); // src追加
+
+                    var dst = document.getElementById('game');
+
+                    count = 1;
+                    
+                    parent.replaceChild(src , dst);
+                }
+            break;
 		}
 
 		player_x_t += dx;
@@ -123,16 +113,16 @@ function stageChange(){
 		var prePosition = player_y * STAGE_WIDTH + player_x;
 		var nowPosition = player_y_t * STAGE_WIDTH + player_x_t;
 
-		// 移動先が何もないか、ゴールなら	
+		// 移動先が何もないか、ゴールなら
 		if(stage[nowPosition] == StageChip.NONE || stage[nowPosition] == StageChip.GOAL){
 			player_x = player_x_t;
 			player_y = player_y_t;
 		}
+
 		// Blockに触れた時の処理を描く
-		
 		if(stage[nowPosition] == StageChip.BLOCK){
 			var nexPosition = (player_y_t + dy) * STAGE_WIDTH + (player_x_t + dx);
-			if(stage[nexPosition] == StageChip.NONE){
+			if(stage[nexPosition] == StageChip.NONE || stage[nexPosition] == StageChip.GOAL){
 				stage[nowPosition] = StageChip.NONE;
 				stage[nexPosition] = StageChip.BLOCK;
 				player_x = player_x_t;

@@ -1,4 +1,4 @@
-var Glaphic = require('./src/Glaphic');
+var Glaphic = require('./src/Glaphic.js');
 
 //2Dコンテキストのオブジェクトを生成する
 var canvas = document.getElementById('canvas');
@@ -50,8 +50,10 @@ function draw(){
         && mousePos.y < 264){
             // ボタン
             button.setSrc('img/button_on.png');
+            //button.changeColor(153,217,234,112,146,190);
         }else{
             button.setSrc('img/button_off.png');
+            //button.changeColor(112,146,190,153,217,234);
         }
         //console.log(message);
     }, false);
